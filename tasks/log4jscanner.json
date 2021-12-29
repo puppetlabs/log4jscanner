@@ -1,0 +1,22 @@
+{
+  "description": "Runs Google's log4jscanner on a target node",
+  "support_noop": false,
+  "parameters": {
+    "directories": {
+      "description": "Directories to search for vulnerable log4j JARs",
+      "type": "Variant[String,Array[String]]"
+    },
+    "skip": {
+      "description": "Glob patterns to skip when scanning (e.g. '/var/run/*')",
+      "type": "Optional[Variant[String,Array[String]]]"
+    },
+    "rewrite": {
+      "description": "Rewrite vulnerable JARs as they are detected",
+      "type": "Optional[Boolean]"
+    }
+  },
+  "implementations": [
+    { "name": "nix.sh", "requirements": ["shell"], "files": ["log4jscanner/files/log4jscanner_nix"], "input_method": "environment" },
+    { "name": "win.ps1", "requirements": ["powershell"], "files": ["log4jscanner/files/log4jscanner.exe"], "input_method": "powershell" }
+  ]
+}
