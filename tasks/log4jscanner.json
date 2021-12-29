@@ -3,12 +3,12 @@
   "support_noop": false,
   "parameters": {
     "directories": {
-      "description": "Directories to search for vulnerable log4j JARs",
-      "type": "Variant[String,Array[String]]"
+      "description": "Comma-separated list of directories to search for vulnerable log4j JARs",
+      "type": "String"
     },
     "skip": {
-      "description": "Glob patterns to skip when scanning (e.g. '/var/run/*')",
-      "type": "Optional[Variant[String,Array[String]]]"
+      "description": "Comma-separated list of glob patterns to skip when scanning (e.g. '/var/run/*')",
+      "type": "Optional[String]"
     },
     "rewrite": {
       "description": "Rewrite vulnerable JARs as they are detected",
