@@ -19,7 +19,7 @@ fi
 dirs=""
 while IFS=',' read -ra directories; do
   for d in "${directories[@]}"; do
-    dirs="${directories} ${d}"
+    dirs="${dirs} ${d}"
   done
 done <<< "${PT_directories}"
 
