@@ -1,117 +1,97 @@
 # log4jscanner
 
-Welcome to your new module. A short overview of the generated parts can be found
-in the [PDK documentation][1].
-
-The README template below provides a starting point with details about what
-information to include in your README.
-
-## Table of Contents
-
-1. [Description](#description)
-1. [Setup - The basics of getting started with log4jscanner](#setup)
-    * [What log4jscanner affects](#what-log4jscanner-affects)
-    * [Setup requirements](#setup-requirements)
-    * [Beginning with log4jscanner](#beginning-with-log4jscanner)
-1. [Usage - Configuration options and additional functionality](#usage)
-1. [Limitations - OS compatibility, etc.](#limitations)
-1. [Development - Guide for contributing to the module](#development)
+This module utilizes Google's [log4jscanner](https://github.com/google/log4jscanner) tool to
+monitor your infrastructure for vulnerable jar files.
 
 ## Description
 
-Briefly tell users why they might want to use your module. Explain what your
-module does and what kind of problems users can solve with it.
+This module can be used in two ways:
+1. Run the log4jscanner::run_scan task on a node. A list of vulernable jars is printed
+in the task output.
+2. Apply the log4jscanner class to any Linux or Windows nodes with a Puppet Agent.
+This will set up a scheduled task to scan for vulnerable jars once per day, and keeps
+a custom fact called 'log4jscanner' updated with the results.
 
-This should be a fairly short description helps the user decide if your module
-is what they want.
+## Log4jscanner binaries
+The binaries were compiled using Go version 1.17.5 and running `go build` from the 
+[google/log4jscanner](https://github.com/google/log4jscanner) repo at SHA
+`edf4af1a38a2930c86fdd955da1719e3d649441c`. log4jscanner_nix was compiled on 
+Centos 7, log4jscanner.exe on Windows 2019, and log4jscanner_osx on 10.15 (not
+yet supported by the rest of the module).
 
 ## Setup
 
-### What log4jscanner affects **OPTIONAL**
+### What log4jscanner affects
 
-If it's obvious what your module touches, you can skip this section. For
-example, folks can probably figure out that your mysql_instance module affects
-their MySQL instances.
+When the class is applied, the module provides an additional fact (`log4jscanner`). This
+also adds a cron job (Linux) or scheduled task (Windows) that defaults to running
+once per day.
 
-If there's more that they should know about, though, this is the place to
-mention:
-
-* Files, packages, services, or operations that the module will alter, impact,
-  or execute.
-* Dependencies that your module automatically installs.
-* Warnings or other important notices.
-
-### Setup Requirements **OPTIONAL**
-
-If your module requires anything extra before setting up (pluginsync enabled,
-another module, etc.), mention it here.
-
-If your most recent release breaks compatibility or requires particular steps
-for upgrading, you might want to include an additional "Upgrading" section here.
-
-### Beginning with log4jscanner
-
-The very basic steps needed for a user to get the module up and running. This
-can include setup steps, if necessary, or it can be an example of the most basic
-use of the module.
+On Linux systems, files are saved to /opt/puppetlabs/log4jscanner. On Windows, they are
+saved to C:\ProgramData\PuppetLabs\log4jscanner.
 
 ## Usage
 
-Include usage examples for common use cases in the **Usage** section. Show your
-users how to use your module to solve problems, and be sure to include code
-examples. Include three to five examples of the most important or common tasks a
-user can accomplish with your module. Show users how to accomplish more complex
-tasks that involve different types, classes, and functions working in tandem.
+### Manifest
+Include the module:
+```puppet
+include log4jscanner
+```
+
+Advanced usage:
+```puppet
+class { 'log4jscanner':
+  linux_directories => ['/opt', '/usr'],
+  linux_skip_directories => ['/opt/puppetlabs'],
+  cron_hour = 12,
+  cron_minute = 30,
+  windows_directories => ["C:"],
+  windows_skip_directories => ["C:\\Windows\\Temp"],
+  scheduled_task_every = 2,
+}
+```
+In this example, all Linux nodes will scan the `/opt` and `/usr` directories, while skipping `/opt/puppetlabs`,
+and all Windows nodes will scan `C:` and skip the Windows temp directory. It will scan Linux nodes every day
+at 12:30 PM, and Windows nodes every other day.
+
+### Task
+Run a basic scan from the command line:
+```bash
+puppet task run log4jscanner::run_scan --nodes <nodes> directories=/opt,/var skip=/opt/puppetlabs
+```
 
 ## Reference
+### Manifest Parameters
+- ensure: Set to 'absent' to remove artifacts (cron/scheduled tasks, files) from nodes. (default 'present')
+- linux_directories: Array of directories to scan on Linux nodes. (default \['/'\])
+- linux_skip: Array of glob patterns to skip scanning on Linux nodes. (default \['/proc','/sys'\])
+- scan_data_owner: User to own log4jscanner files. (default 'root')
+- scan_data_group: Group to own log4jscanner files. (default 'root')
+- cron_user: User to run the cron job for scanning. (default 'root')
+- cron_hour: Hour for cron job run. (default 'absent')
+- cron_month: Month for cron job run. (default 'absent')
+- cron_monthday: Day of the month for cron job run. (default 'absent')
+- cron_weekday: Day of the week for cron job run. (default 'absent')
+- cron_minutes: Minute for cron job run. (default is a random int between 0 and 59)
+- windows_directories: Array of directories to scan on Windows nodes. (default \['C:'\])
+- windows_skip: Array of glob patterns to skip scanning on Windows nodes. (default \["C:\\Windows\\Temp"\])
+- scheduled_task_every: Run the scheduled task every X days. (default 1)
 
-This section is deprecated. Instead, add reference information to your code as
-Puppet Strings comments, and then use Strings to generate a REFERENCE.md in your
-module. For details on how to add code comments and generate documentation with
-Strings, see the [Puppet Strings documentation][2] and [style guide][3].
-
-If you aren't ready to use Strings yet, manually create a REFERENCE.md in the
-root of your module directory and list out each of your module's classes,
-defined types, facts, functions, Puppet tasks, task plans, and resource types
-and providers, along with the parameters for each.
-
-For each element (class, defined type, function, and so on), list:
-
-* The data type, if applicable.
-* A description of what the element does.
-* Valid values, if the data type doesn't make it obvious.
-* Default value, if any.
-
-For example:
-
-```
-### `pet::cat`
-
-#### Parameters
-
-##### `meow`
-
-Enables vocalization in your cat. Valid options: 'string'.
-
-Default: 'medium-loud'.
-```
-
+### Task Parameters
+- directories: Comma-separated list of directories to search for vulnerable log4j jars
+- skip: Comma-separated list of glob patterns to skip when scanning
+- rewrite: When true, rewrite vulnerable jars as they are detected. NOT RECOMMENDED.
 ## Limitations
 
-In the Limitations section, list any incompatibilities, known issues, or other
-warnings.
+Tested on a limited number of OS flavors. Please submit fixes if you find bugs!
 
 ## Development
 
-In the Development section, tell other users the ground rules for contributing
-to your project and how they should submit their work.
+Fork, develop, submit pull request.
 
-## Release Notes/Contributors/Etc. **Optional**
+## Contributors
+- [Nick Burgan](mailto:nickb@puppet.com)
+- Ben Ford
+- Charlie Sharpsteen
 
-If you aren't using changelog, put your release notes here (though you should
-consider using changelog). You can also add any additional sections you feel are
-necessary or important to include here. Please use the `##` header.
-
-[1]: https://puppet.com/docs/pdk/latest/pdk_generating_modules.html
-[2]: https://puppet.com/docs/puppet/latest/puppet_strings.html
-[3]: https://puppet.com/docs/puppet/latest/puppet_strings_style.html
+Class/fact code heavily cribbed from [os_patching](https://github.com/albatrossflavour/puppet_os_patching) by [Tony Green](mailto:tgreen@albatrossflavour.com)
