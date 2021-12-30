@@ -1,0 +1,44 @@
+#!/bin/sh
+#
+# Generate log4jscanner data for consumption by custom fact
+set -e
+
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$PATH
+CACHEDIR=<%= $cache_dir %>
+LOCKFILE="${CACHEDIR}/scan_data_generation.lock"
+UPDATEFILE="${CACHEDIR}/vulnerable_jars"
+ERRORFILE="${CACHEDIR}/scan_errors"
+
+trap "{ rm -f ${LOCKFILE} ; exit 255; }" 2 3 15
+
+if [ -f "${LOCKFILE}" ]; then
+  echo 'scan_data_generation.lock file exists, exiting' >&2
+  exit 0
+else
+  echo "$$" > $LOCKFILE
+fi
+
+skip=""
+<% if $skip and !empty($skip) { -%>
+skip='<%= $skip.map |$d| { "--skip ${d} " }.join(" ") %>'
+<% } -%>
+
+dirs='<%= $directories.join(" ") %>'
+
+if [ -f "${UPDATEFILE}" ]; then
+  mv -f "${UPDATEFILE}" "${UPDATEFILE}.previous"
+else
+  touch "${UPDATEFILE}.previous"
+fi
+
+${CACHEDIR}/log4jscanner_nix ${skip} ${dirs} 1>${UPDATEFILE} 2>${ERRORFILE}
+diff=$(diff -y --suppress-common "${UPDATEFILE}" "${UPDATEFILE}.previous" | wc -l)
+rm -f "${UPDATEFILE}.previous"
+if [ "${diff}" != "0" ]; then
+  logger -p info -t scan_data_generation.sh "Uploading fact"
+  <%= $fact_upload_cmd %> 2>/dev/null 1>/dev/null
+fi
+logger -p info -t scan_data_generation.sh "Log4jscanner scan data refreshed"
+
+rm $LOCKFILE
+exit 0

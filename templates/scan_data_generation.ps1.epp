@@ -1,0 +1,136 @@
+[Cmdletbinding()]
+param(
+  [String]$LockFile = "C:\ProgramData\PuppetLabs\log4jscanner\scan_data_generation.lock",
+  [String]$CacheDir = "<%= $cache_dir %>",
+  [String]$ScanFile = "<%= $cache_dir %>\vulnerable_jars",
+  [String]$ErrorFile = "<%= $cache_dir %>\scan_errors"
+)
+$ErrorActionPreference = "Stop"
+
+function Save-LockFile {
+    # start assuming it's not OK to save a lock file
+    $lockFileOk = $false
+
+    # how long to wait for lock file to clear
+    $lockfileTimeout = 600
+
+    # check if it exists already
+    if (Test-Path $LockFile) {
+        Write-Verbose "Existing lock file found."
+        # if it does exist, check if there is a PID in it
+        $lockFileContent = Get-content $lockfile
+
+        if (@($lockFileContent).count -gt 1) {
+            # more than one line in lock file. this shouldn't be possible
+            Throw "Error - more than one line in lock file."
+        }
+        else {
+            # only one line in lock file
+            # get process matching this PID
+            $process = Get-Process | Where-Object { $_.Id -eq $lockFileContent }
+
+            # if process exists
+            if ($process) {
+                $timer = [Diagnostics.Stopwatch]::StartNew()
+                while (($timer.Elapsed.TotalSeconds -lt $lockfileTimeout) -and ($process)) {
+                    Write-Verbose "Lock file with active PID $($process.id) detected. Waiting for lock file to clear."
+                    Start-Sleep -Seconds 10
+                    $process = Get-Process | Where-Object { $_.ID -eq $lockFileContent }
+                }
+                $timer.Stop()
+                # If we timed out, $process is not null
+                if ($process) {
+                    Throw "Timed out after waiting ${lockfileTimeout} seconds for the lock file with PID $($process.id) to clear."
+                }
+                $lockFileOk = $process -eq $null
+            }
+            else {
+                Write-Verbose "No process found matching the PID in lock file."
+                # no process found matching the PID in the lock file
+                # remove it and continue
+                Remove-LockFile
+                $lockFileOk = $true
+            }
+        }
+    }
+    else {
+        # lock file doesn't exist
+        $lockFileOk = $true
+    }
+
+    if ($lockFileOk) {
+        # if it isn't, put this execution's PID in the lock file
+        try {
+            Write-Verbose "Saving lock file"
+            $PID | Out-File $LockFile -Force
+            # return true
+            $true
+        }
+        catch {
+            Throw "Error saving lockfile."
+        }
+    }
+    else {
+        # We shouldn't ever reach here, but just in case
+        # we forget to handle a case above.
+        Throw "Lock file saving blocked."
+    }
+}
+
+function Remove-LockFile {
+    # remove the lock file, if it exists
+    if (Test-Path $LockFile) {
+        Try {
+            Write-Verbose "Removing lock file"
+            Remove-Item $LockFile -Force -Confirm:$false
+        }
+        catch {
+            Throw "Error removing existing lockfile."
+        }
+    }
+}
+
+function Invoke-Scan {
+  if (Test-Path $ScanFile) {
+    Move-Item -Path $ScanFile -Destination "$ScanFile.previous" -Force
+  } else {
+    echo " " | Out-File -FilePath "$ScanFile.previous"
+  }
+
+  $cmd = "$CacheDir\log4jscanner.exe"
+  $params = @()
+  <% if $skip and !empty($skip) { %>
+  <% $skip.each |$dir| { %>
+  $params += "--skip `"<%= $dir %>`""
+  <% } %>
+  <% } %>
+
+  <% $directories.each |$d| { %>
+  $params += "`"<%= $d %>`""
+  <% } %>
+  Start-Process -FilePath $cmd -ArgumentList $params -NoNewWindow -RedirectStandardError $ErrorFile -RedirectStandardOutput $ScanFile -Wait
+
+  $scanFileContents = (Get-Content $ScanFile)
+  if ($scanFileContents -eq $null) { $scanFileContents = " " }
+  $scanFilePreviousContents = (Get-Content "$ScanFile.previous")
+  if ($scanFilePreviousContents -eq $null) { $scanFilePreviousContents = " " }
+  Remove-Item -Path "$ScanFile.previous"
+  $diff = (Compare-Object $scanFileContents $scanFilePreviousContents)
+  if ($diff) {
+    Write-Host "Uploading fact"
+    $fact_cmd = "<%= regsubst($fact_upload_cmd,'"','`"','G') %>"
+    & $fact_cmd --color=false
+  }
+}
+
+try {
+  Invoke-Scan
+}
+finally {
+  Remove-LockFile
+}
+
+trap {
+  Write-Error ("Exception caught: {0} {1} " -f $_.exception.Message, $_.invocationinfo.positionmessage)
+  exit 2
+}
