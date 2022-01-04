@@ -7,7 +7,7 @@ fixtures:
   forge_modules:
     cron_core:
       repo: puppetlabs-cron_core
-      ref: 3.0.0
+      ref: 1.1.0
     cron:
       repo: puppet-cron
       ref: 3.0.0

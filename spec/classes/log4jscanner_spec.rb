@@ -47,7 +47,7 @@ describe 'log4jscanner' do
             .with_command(fact_upload_cmd)
             .with_path(['/usr/bin', '/bin', '/sbin', '/usr/local/bin', cache_dir])
             .with_refreshonly(true)
-            .with_subscribe(["File[#{scan_cmd}]","File[#{cache_dir}]"])
+            .with_subscribe(["File[#{scan_cmd}]", "File[#{cache_dir}]"])
           case os_facts[:kernel]
           when 'Linux'
             is_expected.to contain_exec('Log4jscanner generate scan data')
@@ -79,11 +79,13 @@ describe 'log4jscanner' do
               .with_command('C:\Windows\System32/WindowsPowerShell/v1.0/powershell.exe')
               .with_arguments("-NonInteractive -ExecutionPolicy RemoteSigned -File #{scan_cmd}")
               .with_user('SYSTEM')
-              .with_trigger({
-                'schedule' => 'daily',
-                'start_time' => '02:11',
-                'every' => 1,
-              })
+              .with_trigger(
+                {
+                  'schedule' => 'daily',
+                  'start_time' => '02:11',
+                  'every' => 1,
+                },
+              )
               .with_require("File[#{scan_cmd}]")
           end
         end
@@ -147,11 +149,13 @@ describe 'log4jscanner' do
               .with_content(/--skip `"C:\\PeaceAnd`".*--skip `"C:\\LongLife`".*`"C:\\LiveLong`".*`"C:\\AndProsper`"/m)
             is_expected.to contain_scheduled_task('Log4jscanner - Cache scan data')
               .with_ensure('present')
-              .with_trigger({
-                'schedule' => 'daily',
-                'start_time' => '02:11',
-                'every' => 2,
-              })
+              .with_trigger(
+                {
+                  'schedule'   => 'daily',
+                  'start_time' => '02:11',
+                  'every'      => 2,
+                },
+              )
           end
         end
       end
