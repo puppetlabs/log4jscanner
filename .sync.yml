@@ -5,4 +5,14 @@
 #
 # See https://github.com/puppetlabs/pdk-templates/blob/main/config_defaults.yml
 # for the default values.
---- {}
+---
+.github/workflows/pr_test.yml:
+  unmanaged: false
+.github/workflows/auto_release.yml:
+  unmanaged: false
+.github/workflows/spec.yml:
+  unmanaged: false
+  checks: 'validate lint check rubocop'
+.github/workflows/release.yml:
+  unmanaged: false
+
