@@ -5,6 +5,8 @@ describe 'log4jscanner' do
       let(:facts) { os_facts }
       let(:environment) { 'production' }
       let(:params) { { 'cron_minute' => 11 } }
+      let(:scan_cmd) { "#{cache_dir}/#{scan_script}" }
+
       case os_facts[:kernel]
       when 'Linux'
         let(:fact_upload_cmd) { '/opt/puppetlabs/bin/puppet facts upload --environment production' }
@@ -13,7 +15,7 @@ describe 'log4jscanner' do
         let(:scan_script_mode) { '0700' }
         let(:scan_bin) { 'log4jscanner_nix' }
         let(:checksum) { '1e8d28e53cde54b3b81c66401afd4485adfecdf6cbaf622ff0324fe2b3a1649b' }
-        let(:default_script_regex) { /CACHEDIR=#{cache_dir}/ }
+        let(:default_script_regex) { %r{CACHEDIR=#{cache_dir}} }
       when 'windows'
         let(:fact_upload_cmd) { '"C:\Program Files\Puppet Labs\Puppet\bin\puppet.bat" facts upload --environment production' }
         let(:cache_dir) { 'C:/ProgramData/PuppetLabs/log4jscanner' }
@@ -21,10 +23,8 @@ describe 'log4jscanner' do
         let(:scan_script_mode) { '0770' }
         let(:scan_bin) { 'log4jscanner.exe' }
         let(:checksum) { 'b360695ad5ea1982966eb827f57cae6d83f2cec54def4e30a72ffb9b91b1b1de' }
-        let(:default_script_regex) { /\$CacheDir = "#{cache_dir}"/ }
+        let(:default_script_regex) { %r{\$CacheDir = "#{cache_dir}"} }
       end
-
-      let(:scan_cmd) { "#{cache_dir}/#{scan_script}" }
 
       context 'with default parameters' do
         it do
@@ -129,7 +129,7 @@ describe 'log4jscanner' do
           when 'Linux'
             is_expected.to contain_file(scan_cmd)
               .with_ensure('file')
-              .with_content(/--skip \/peaceand.*--skip \/longlife.*\/livelong \/andprosper/m)
+              .with_content(%r{--skip /peaceand.*--skip /longlife.*/livelong /andprosper}m)
             is_expected.to contain_exec('Log4jscanner generate scan data')
               .with_command(scan_cmd)
               .with_user('picard')
@@ -146,7 +146,7 @@ describe 'log4jscanner' do
           when 'windows'
             is_expected.to contain_file(scan_cmd)
               .with_ensure('file')
-              .with_content(/--skip `"C:\\PeaceAnd`".*--skip `"C:\\LongLife`".*`"C:\\LiveLong`".*`"C:\\AndProsper`"/m)
+              .with_content(%r{--skip `"C:\\PeaceAnd`".*--skip `"C:\\LongLife`".*`"C:\\LiveLong`".*`"C:\\AndProsper`"}m)
             is_expected.to contain_scheduled_task('Log4jscanner - Cache scan data')
               .with_ensure('present')
               .with_trigger(
