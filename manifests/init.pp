@@ -1,3 +1,25 @@
+# @param present
+#   Whether the scanner should be installed
+# @param linux_directories
+#   Which directories to scan on Linux nodes
+# @param linux_skip
+#   Which directories to skip on Linux nodes
+# @param scan_data_owner
+#   Owner of the generated scan results
+# @param scan_data_group
+#   Group of the generated scan results
+# @param cron_user
+# @param cron_hour
+# @param cron_month
+# @param cron_monthday
+# @param cron_weekday
+# @param cron_minute
+# @param windows_directories
+#   Which directories to scan on Windows nodes
+# @param windows_skip
+#   Which directories to skip on Windows nodes
+# @param scheduled_task_every
+#   How often the task should run, as a number of days
 class log4jscanner (
   Enum['present', 'absent'] $ensure  = 'present',
   Array[String] $linux_directories   = ['/'],
