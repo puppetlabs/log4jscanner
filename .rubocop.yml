@@ -52,6 +52,9 @@ Style/FormatStringToken:
 Style/Lambda:
   Description: Prefer the keyword for easier discoverability.
   EnforcedStyle: literal
+Style/RegexpLiteral:
+  Description: Community preference. See https://github.com/voxpupuli/modulesync_config/issues/168
+  EnforcedStyle: percent_r
 Style/TernaryParentheses:
   Description: Checks for use of parentheses around ternary conditions. Enforce parentheses
     on complex expressions for better readability, but seriously consider breaking
@@ -352,8 +355,6 @@ RSpec/RepeatedIncludeExample:
   Enabled: false
 RSpec/ReturnFromStub:
   Enabled: false
-RSpec/ScatteredLet:
-  Enabled: false
 RSpec/SharedExamples:
   Enabled: false
 RSpec/StubbedMock:
@@ -455,8 +456,6 @@ Style/RedundantRegexpEscape:
 Style/RedundantSelfAssignment:
   Enabled: false
 Style/RedundantSort:
-  Enabled: false
-Style/RegexpLiteral:
   Enabled: false
 Style/RescueStandardError:
   Enabled: false
