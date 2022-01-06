@@ -11,6 +11,7 @@
 ### Tasks
 
 * [`run_scan`](#run_scan): Runs Google's log4jscanner on a target node
+* [`run_scan_osx`](#run_scan_osx): Runs Google's log4jscanner on an OSX target node
 
 ## Classes
 
@@ -36,6 +37,8 @@ The following parameters are available in the `log4jscanner` class:
 * [`windows_directories`](#windows_directories)
 * [`windows_skip`](#windows_skip)
 * [`scheduled_task_every`](#scheduled_task_every)
+* [`osx_directories`](#osx_directories)
+* [`osx_skip`](#osx_skip)
 * [`ensure`](#ensure)
 
 ##### <a name="present"></a>`present`
@@ -56,7 +59,7 @@ Data type: `Array[String]`
 
 Which directories to skip on Linux nodes
 
-Default value: `['/proc','/sys']`
+Default value: `['/proc', '/sys', '/tmp']`
 
 ##### <a name="scan_data_owner"></a>`scan_data_owner`
 
@@ -146,6 +149,22 @@ How often the task should run, as a number of days
 
 Default value: `1`
 
+##### <a name="osx_directories"></a>`osx_directories`
+
+Data type: `Array[String]`
+
+Which directories to scan on OSX nodes
+
+Default value: `['/']`
+
+##### <a name="osx_skip"></a>`osx_skip`
+
+Data type: `Array[String]`
+
+Which directories to skip on OSX nodes
+
+Default value: `['/tmp', '/Users/osx', '/dev', '/private/var/db', '/private/var/folders', '/System/Volumes/Data/private/var/db', '/System/Volumes/Data/private/var/folders']`
+
 ##### <a name="ensure"></a>`ensure`
 
 Data type: `Enum['present', 'absent']`
@@ -159,6 +178,32 @@ Default value: `'present'`
 ### <a name="run_scan"></a>`run_scan`
 
 Runs Google's log4jscanner on a target node
+
+**Supports noop?** false
+
+#### Parameters
+
+##### `directories`
+
+Data type: `String`
+
+Comma-separated list of directories to search for vulnerable log4j JARs
+
+##### `skip`
+
+Data type: `Optional[String]`
+
+Comma-separated list of glob patterns to skip when scanning (e.g. '/var/run/*')
+
+##### `rewrite`
+
+Data type: `Optional[Boolean]`
+
+Rewrite vulnerable JARs as they are detected
+
+### <a name="run_scan_osx"></a>`run_scan_osx`
+
+Runs Google's log4jscanner on an OSX target node
 
 **Supports noop?** false
 

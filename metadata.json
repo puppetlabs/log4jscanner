@@ -1,6 +1,6 @@
 {
   "name": "puppetlabs-log4jscanner",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": "puppetlabs",
   "summary": "Module utilizing Google's log4jscanner to scan infrastructure for vulnerable log4j JARs",
   "license": "Apache-2.0",
