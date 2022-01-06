@@ -31,7 +31,7 @@ else
   touch "${UPDATEFILE}.previous"
 fi
 
-${CACHEDIR}/log4jscanner_nix ${skip} ${dirs} 1>${UPDATEFILE} 2>${ERRORFILE}
+${CACHEDIR}/<%= $scan_bin %> ${skip} ${dirs} 1>${UPDATEFILE} 2>${ERRORFILE}
 diff=$(diff -y --suppress-common "${UPDATEFILE}" "${UPDATEFILE}.previous" | wc -l)
 rm -f "${UPDATEFILE}.previous"
 if [ "${diff}" != "0" ]; then

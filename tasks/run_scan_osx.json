@@ -1,5 +1,5 @@
 {
-  "description": "Runs Google's log4jscanner on a target node",
+  "description": "Runs Google's log4jscanner on an OSX target node",
   "support_noop": false,
   "parameters": {
     "directories": {
@@ -16,8 +16,6 @@
     }
   },
   "implementations": [
-    { "name": "osx.sh", "requirements": ["darwin"], "files": ["log4jscanner/files/log4jscanner_osx"], "input_method": "environment" },
-    { "name": "nix.sh", "requirements": ["shell"], "files": ["log4jscanner/files/log4jscanner_nix"], "input_method": "environment" },
-    { "name": "win.ps1", "requirements": ["powershell"], "files": ["log4jscanner/files/log4jscanner.exe"], "input_method": "powershell" }
+    { "name": "osx.sh", "requirements": ["shell"], "files": ["log4jscanner/files/log4jscanner_osx"], "input_method": "environment" }
   ]
 }

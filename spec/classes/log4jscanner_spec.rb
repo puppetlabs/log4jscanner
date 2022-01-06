@@ -1,12 +1,9 @@
 require 'spec_helper'
 describe 'log4jscanner' do
+  # I don't think rspec-puppet-facts supports OSX, but the code is here
+  # in case that gets added at some point.
   on_supported_os.each do |os, os_facts|
     context "on #{os}" do
-      let(:facts) { os_facts }
-      let(:environment) { 'production' }
-      let(:params) { { 'cron_minute' => 11 } }
-      let(:scan_cmd) { "#{cache_dir}/#{scan_script}" }
-
       case os_facts[:kernel]
       when 'Linux'
         let(:fact_upload_cmd) { '/opt/puppetlabs/bin/puppet facts upload --environment production' }
@@ -15,6 +12,14 @@ describe 'log4jscanner' do
         let(:scan_script_mode) { '0700' }
         let(:scan_bin) { 'log4jscanner_nix' }
         let(:checksum) { '1e8d28e53cde54b3b81c66401afd4485adfecdf6cbaf622ff0324fe2b3a1649b' }
+        let(:default_script_regex) { %r{CACHEDIR=#{cache_dir}} }
+      when 'Darwin'
+        let(:fact_upload_cmd) { '/opt/puppetlabs/bin/puppet facts upload --environment production' }
+        let(:cache_dir) { '/opt/puppetlabs/log4jscanner' }
+        let(:scan_script) { 'scan_data_generation.sh' }
+        let(:scan_script_mode) { '0700' }
+        let(:scan_bin) { 'log4jscanner_osx' }
+        let(:checksum) { 'b81bb538179909213aea0ae414492dd4a5f05e4a243b55894d8507dffcb9d23a' }
         let(:default_script_regex) { %r{CACHEDIR=#{cache_dir}} }
       when 'windows'
         let(:fact_upload_cmd) { '"C:\Program Files\Puppet Labs\Puppet\bin\puppet.bat" facts upload --environment production' }
@@ -25,6 +30,11 @@ describe 'log4jscanner' do
         let(:checksum) { 'b360695ad5ea1982966eb827f57cae6d83f2cec54def4e30a72ffb9b91b1b1de' }
         let(:default_script_regex) { %r{\$CacheDir = "#{cache_dir}"} }
       end
+
+      let(:facts) { os_facts }
+      let(:environment) { 'production' }
+      let(:params) { { 'cron_minute' => 11 } }
+      let(:scan_cmd) { "#{cache_dir}/#{scan_script}" }
 
       context 'with default parameters' do
         it do
@@ -49,7 +59,7 @@ describe 'log4jscanner' do
             .with_refreshonly(true)
             .with_subscribe(["File[#{scan_cmd}]", "File[#{cache_dir}]"])
           case os_facts[:kernel]
-          when 'Linux'
+          when 'Linux', 'Darwin'
             is_expected.to contain_exec('Log4jscanner generate scan data')
               .with_command(scan_cmd)
               .with_user('root')
@@ -101,7 +111,7 @@ describe 'log4jscanner' do
           is_expected.not_to contain_exec('Log4jscanner generate scan data')
           is_expected.not_to contain_exec('Log4jscanner fact upload')
           case os_facts[:kernel]
-          when 'Linux'
+          when 'Linux', 'Darwin'
             is_expected.to contain_cron('Log4jscanner - Cache scan data').with_ensure('absent')
           when 'windows'
             is_expected.to contain_scheduled_task('Log4jscanner - Cache scan data').with_ensure('absent')
@@ -123,6 +133,8 @@ describe 'log4jscanner' do
           params['windows_directories'] = ['C:\LiveLong', 'C:\AndProsper']
           params['windows_skip'] = ['C:\PeaceAnd', 'C:\LongLife']
           params['scheduled_task_every'] = 2
+          params['osx_directories'] = ['/livelongosx', '/andprosperosx']
+          params['osx_skip'] = ['/peaceandosx', '/longlifeosx']
 
           is_expected.to compile.with_all_deps
           case os_facts[:kernel]
@@ -130,6 +142,23 @@ describe 'log4jscanner' do
             is_expected.to contain_file(scan_cmd)
               .with_ensure('file')
               .with_content(%r{--skip /peaceand.*--skip /longlife.*/livelong /andprosper}m)
+            is_expected.to contain_exec('Log4jscanner generate scan data')
+              .with_command(scan_cmd)
+              .with_user('picard')
+              .with_group('starfleet')
+            is_expected.to contain_cron('Log4jscanner - Cache scan data')
+              .with_ensure('present')
+              .with_command(scan_cmd)
+              .with_user('riker')
+              .with_hour(1)
+              .with_minute(11)
+              .with_month(2)
+              .with_monthday(3)
+              .with_weekday(4)
+          when 'Darwin'
+            is_expected.to contain_file(scan_cmd)
+              .with_ensure('file')
+              .with_content(%r{--skip /peaceandosx.*--skip /longlifeosx.*/livelongosx /andprosperosx}m)
             is_expected.to contain_exec('Log4jscanner generate scan data')
               .with_command(scan_cmd)
               .with_user('picard')

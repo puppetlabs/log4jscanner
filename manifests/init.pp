@@ -20,10 +20,14 @@
 #   Which directories to skip on Windows nodes
 # @param scheduled_task_every
 #   How often the task should run, as a number of days
+# @param osx_directories
+#   Which directories to scan on OSX nodes
+# @param osx_skip
+#   Which directories to skip on OSX nodes
 class log4jscanner (
   Enum['present', 'absent'] $ensure  = 'present',
   Array[String] $linux_directories   = ['/'],
-  Array[String] $linux_skip          = ['/proc','/sys'],
+  Array[String] $linux_skip          = ['/proc', '/sys', '/tmp'],
   String $scan_data_owner            = 'root',
   String $scan_data_group            = 'root',
   String $cron_user                  = 'root',
@@ -35,6 +39,8 @@ class log4jscanner (
   Array[String] $windows_directories = ['C:'],
   Array[String] $windows_skip        = ['C:\Windows\Temp'],
   Integer $scheduled_task_every      = 1,
+  Array[String] $osx_directories     = ['/'],
+  Array[String] $osx_skip            = ['/tmp', '/Users/osx', '/dev', '/private/var/db', '/private/var/folders', '/System/Volumes/Data/private/var/db', '/System/Volumes/Data/private/var/folders'],
 ) {
 
   # Run things/set up files, or clean up when ensure=>absent?
@@ -67,9 +73,9 @@ class log4jscanner (
   case $facts['kernel'] {
     'Linux': {
       $fact_upload_cmd = "/opt/puppetlabs/bin/puppet facts upload --environment ${environment}"
-      $cache_dir        = '/opt/puppetlabs/log4jscanner'
-      $scan_script       = 'scan_data_generation.sh'
-      $scan_script_mode       = '0700'
+      $cache_dir = '/opt/puppetlabs/log4jscanner'
+      $scan_script = 'scan_data_generation.sh'
+      $scan_script_mode = '0700'
       File {
         owner => $scan_data_owner,
         group => $scan_data_group,
@@ -79,6 +85,45 @@ class log4jscanner (
       $skip_dirs = $linux_skip
       $scan_bin = 'log4jscanner_nix'
       $checksum = '1e8d28e53cde54b3b81c66401afd4485adfecdf6cbaf622ff0324fe2b3a1649b'
+      $scan_cmd = "${cache_dir}/${scan_script}"
+
+      if $generate_scan_data_exec {
+        exec { $generate_scan_data_exec:
+          command     => $scan_cmd,
+          user        => $scan_data_owner,
+          group       => $scan_data_group,
+          refreshonly => true,
+          require     => File[$scan_cmd],
+          timeout     => 0,
+        }
+      }
+
+      cron { 'Log4jscanner - Cache scan data':
+        ensure   => $ensure,
+        command  => $scan_cmd,
+        user     => $cron_user,
+        hour     => $cron_hour,
+        minute   => $cron_minute,
+        month    => $cron_month,
+        monthday => $cron_monthday,
+        weekday  => $cron_weekday,
+        require  => File[$scan_cmd],
+      }
+    }
+    'Darwin': {
+      $fact_upload_cmd = "/opt/puppetlabs/bin/puppet facts upload --environment ${environment}"
+      $cache_dir = '/opt/puppetlabs/log4jscanner'
+      $scan_script = 'scan_data_generation.sh'
+      $scan_script_mode = '0700'
+      File {
+        owner => $scan_data_owner,
+        group => $scan_data_group,
+        mode  => '0644',
+      }
+      $dirs = $osx_directories
+      $skip_dirs = $osx_skip
+      $scan_bin = 'log4jscanner_osx'
+      $checksum = 'b81bb538179909213aea0ae414492dd4a5f05e4a243b55894d8507dffcb9d23a'
       $scan_cmd = "${cache_dir}/${scan_script}"
 
       if $generate_scan_data_exec {
@@ -160,6 +205,7 @@ class log4jscanner (
     'skip'            => $skip_dirs,
     'cache_dir'       => $cache_dir,
     'fact_upload_cmd' => $fact_upload_cmd,
+    'scan_bin'        => $scan_bin,
   }
   file { $scan_cmd:
     ensure  => $ensure_file,
