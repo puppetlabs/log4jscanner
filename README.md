@@ -54,17 +54,20 @@ In this example, all Linux nodes will scan the `/opt` and `/usr` directories, wh
 and all Windows nodes will scan `C:` and skip the Windows temp directory. It will scan Linux nodes every day
 at 12:30 PM, and Windows nodes every other day.
 
+Note that when using the class with OSX, you'll want to use the `osx_directories` and `osx_skip` parameters,
+and you'll likely need to change the `scan_data_group` to `admin` rather than `root`.
+
 ### Task
 Run a basic scan from the command line:
 ```bash
 puppet task run log4jscanner::run_scan --nodes <nodes> directories=/opt,/var skip=/opt/puppetlabs
 ```
-
+Note that for OSX, you'll want to run the `log4jscanner::run_scan_osx` task.
 ## Reference
 ### Manifest Parameters
 - ensure: Set to 'absent' to remove artifacts (cron/scheduled tasks, files) from nodes. (default 'present')
 - linux_directories: Array of directories to scan on Linux nodes. (default \['/'\])
-- linux_skip: Array of glob patterns to skip scanning on Linux nodes. (default \['/proc','/sys'\])
+- linux_skip: Array of glob patterns to skip scanning on Linux nodes. (default \['/proc','/sys','/tmp'\])
 - scan_data_owner: User to own log4jscanner files. (default 'root')
 - scan_data_group: Group to own log4jscanner files. (default 'root')
 - cron_user: User to run the cron job for scanning. (default 'root')
@@ -76,6 +79,8 @@ puppet task run log4jscanner::run_scan --nodes <nodes> directories=/opt,/var ski
 - windows_directories: Array of directories to scan on Windows nodes. (default \['C:'\])
 - windows_skip: Array of glob patterns to skip scanning on Windows nodes. (default \["C:\\Windows\\Temp"\])
 - scheduled_task_every: Run the scheduled task every X days. (default 1)
+- osx_directories: Array of directories to scan on OSX nodes (default \['/'\])
+- osx_skip: Array of glob patterns to skip scanning on OSX nodes (default \['/tmp', '/Users/osx', '/dev', '/private/var/db', '/private/var/folders', '/System/Volumes/Data/private/var/db', '/System/Volumes/Data/private/var/folders'\])
 
 ### Task Parameters
 - directories: Comma-separated list of directories to search for vulnerable log4j jars

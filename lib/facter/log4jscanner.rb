@@ -1,5 +1,5 @@
 Facter.add('log4jscanner') do
-  confine { ['Linux', 'windows'].include?(Facter.value(:kernel)) }
+  confine { ['Linux', 'Darwin', 'windows'].include?(Facter.value(:kernel)) }
   setcode do
     errors = []
     warnings = {}
@@ -7,7 +7,7 @@ Facter.add('log4jscanner') do
     data = {}
 
     cache_dir = case Facter.value(:kernel)
-                when 'Linux'
+                when 'Linux', 'Darwin'
                   '/opt/puppetlabs/log4jscanner'
                 when 'windows'
                   'C:\ProgramData\PuppetLabs\log4jscanner'
