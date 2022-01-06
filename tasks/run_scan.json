@@ -16,6 +16,7 @@
     }
   },
   "implementations": [
+    { "name": "osx.sh", "requirements": ["darwin"], "files": ["log4jscanner/files/log4jscanner_osx"], "input_method": "environment" },
     { "name": "nix.sh", "requirements": ["shell"], "files": ["log4jscanner/files/log4jscanner_nix"], "input_method": "environment" },
     { "name": "win.ps1", "requirements": ["powershell"], "files": ["log4jscanner/files/log4jscanner.exe"], "input_method": "powershell" }
   ]

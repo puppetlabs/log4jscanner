@@ -60,6 +60,26 @@ Run a basic scan from the command line:
 puppet task run log4jscanner::run_scan --nodes <nodes> directories=/opt,/var skip=/opt/puppetlabs
 ```
 
+#### Running the task on macOS machines
+The task supports macOS, but requires a little extra configuration since Bolt doesn't have an easy way to
+differentiate macOS from other posix systems. You'll need to create an [inventory file](https://puppet.com/docs/bolt/latest/inventory_files.html)
+that defines the `darwin` feature for all the macOS machines you want to run on. The file could look similar to
+
+```yaml
+groups:
+  - name: macos
+    targets:
+      - 192.168.0.122
+    features:
+      - darwin
+```
+
+Then you'll need to run the task with Bolt directly,
+
+```bash
+bolt task run log4jscanner::run_scan directories=/opt,/var skip=/opt/puppetlabs --targets macos
+```
+
 ## Reference
 ### Manifest Parameters
 - ensure: Set to 'absent' to remove artifacts (cron/scheduled tasks, files) from nodes. (default 'present')
