@@ -13,11 +13,23 @@ This will set up a scheduled task to scan for vulnerable jars once per day, and 
 a custom fact called 'log4jscanner' updated with the results.
 
 ## Log4jscanner binaries
-The binaries were compiled using Go version 1.17.5 and running `go build` from the 
+The binaries were compiled using Go version 1.17.5 and running `go build` from the
 [google/log4jscanner](https://github.com/google/log4jscanner) repo at SHA
-`edf4af1a38a2930c86fdd955da1719e3d649441c`. log4jscanner_nix was compiled on 
-Centos 7, log4jscanner.exe on Windows 2019, and log4jscanner_osx on 10.15 (not
-yet supported by the rest of the module).
+`edf4af1a38a2930c86fdd955da1719e3d649441c`. `log4jscanner_nix` was compiled on
+Centos 7, `log4jscanner.exe` on Windows 2019, and `log4jscanner_osx` on 10.15.
+
+### Compiling your own binaries
+If you'd like to compile your own binaries or add support for another platform,
+this is the rough workflow to follow. Feel free to contribute new platform support
+with a pull request to this repository.
+
+1. Compile binaries and add them to the `/files` directory. Use the existing naming convention of `log4jscanner_<platform>`.
+    * If you're replacing a binary, ensure it's named exactly the same as the original.
+1. Calculate the sha256 checksum for each binary with a command like `sha256sum log4jscanner_nix`.
+1. Add the checksums to the appropriate places in the `log4jscanner` class in `/manifests/init.pp`.
+    * Add the appropriate conditional logic if you're adding new platform support.
+1. If you're adding support for another platform, then create a platform specific task following the example of the `log4jscanner::run_scan_osx` task.
+
 
 ## Setup
 
@@ -93,6 +105,7 @@ Tested on a limited number of OS flavors. Please submit fixes if you find bugs!
 ## Development
 
 Fork, develop, submit pull request.
+
 
 ## Contributors
 - [Nick Burgan](mailto:nickb@puppet.com)
