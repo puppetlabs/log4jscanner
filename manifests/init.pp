@@ -72,7 +72,9 @@ class log4jscanner (
 
   case $facts['kernel'] {
     'Linux': {
-      $fact_upload_cmd = "/opt/puppetlabs/bin/puppet facts upload --environment ${environment}"
+      $puppet_bin = '/opt/puppetlabs/bin/puppet'
+      $fact_upload_params = "facts upload --environment ${environment}"
+      $fact_upload_cmd = "${puppet_bin} ${fact_upload_params}"
       $cache_dir = '/opt/puppetlabs/log4jscanner'
       $scan_script = 'scan_data_generation.sh'
       $scan_script_mode = '0700'
@@ -111,7 +113,9 @@ class log4jscanner (
       }
     }
     'Darwin': {
-      $fact_upload_cmd = "/opt/puppetlabs/bin/puppet facts upload --environment ${environment}"
+      $puppet_bin = '/opt/puppetlabs/bin/puppet'
+      $fact_upload_params = "facts upload --environment ${environment}"
+      $fact_upload_cmd = "${puppet_bin} ${fact_upload_params}"
       $cache_dir = '/opt/puppetlabs/log4jscanner'
       $scan_script = 'scan_data_generation.sh'
       $scan_script_mode = '0700'
@@ -150,7 +154,9 @@ class log4jscanner (
       }
     }
     'windows': {
-      $fact_upload_cmd = "\"${windows_puppet_install_path}\\bin\\puppet.bat\" facts upload --environment ${environment}"
+      $puppet_bin = "${windows_puppet_install_path}\\bin\\puppet.bat"
+      $fact_upload_params = "facts upload --environment ${environment}"
+      $fact_upload_cmd = "\"${puppet_bin}\" ${fact_upload_params}"
       $cache_dir = 'C:/ProgramData/PuppetLabs/log4jscanner'
       $scan_script = 'scan_data_generation.ps1'
       $scan_script_mode = '0770'
@@ -201,11 +207,12 @@ class log4jscanner (
   }
 
   $template_data = {
-    'directories'     => $dirs,
-    'skip'            => $skip_dirs,
-    'cache_dir'       => $cache_dir,
-    'fact_upload_cmd' => $fact_upload_cmd,
-    'scan_bin'        => $scan_bin,
+    'directories'        => $dirs,
+    'skip'               => $skip_dirs,
+    'cache_dir'          => $cache_dir,
+    'puppet_bin'         => $puppet_bin,
+    'fact_upload_params' => $fact_upload_params,
+    'scan_bin'           => $scan_bin,
   }
   file { $scan_cmd:
     ensure  => $ensure_file,

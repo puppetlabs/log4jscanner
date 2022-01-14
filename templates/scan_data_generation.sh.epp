@@ -36,7 +36,7 @@ diff=$(diff -y --suppress-common "${UPDATEFILE}" "${UPDATEFILE}.previous" | wc -
 rm -f "${UPDATEFILE}.previous"
 if [ "${diff}" != "0" ]; then
   logger -p info -t scan_data_generation.sh "Uploading fact"
-  <%= $fact_upload_cmd %> 2>/dev/null 1>/dev/null
+  <%= $puppet_bin %> <%= $fact_upload_params %> 2>/dev/null 1>/dev/null
 fi
 logger -p info -t scan_data_generation.sh "Log4jscanner scan data refreshed"
 

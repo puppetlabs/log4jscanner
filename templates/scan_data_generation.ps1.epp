@@ -118,8 +118,12 @@ function Invoke-Scan {
   $diff = (Compare-Object $scanFileContents $scanFilePreviousContents)
   if ($diff) {
     Write-Host "Uploading fact"
-    $fact_cmd = "<%= regsubst($fact_upload_cmd,'"','`"','G') %>"
-    & $fact_cmd --color=false
+    $cmd = "<%= $puppet_bin %>"
+    $params = $()
+    <% split($fact_upload_params, ' ').each |$p| { %>
+    $params += "<%= $p %>"
+    <% } %>
+    Start-Process -FilePath $cmd -ArgumentList $params -NoNewWindow -Wait
   }
 }
 
