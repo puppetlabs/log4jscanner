@@ -21,14 +21,14 @@ Facter.add('log4jscanner') do
         warnings['scan_file_time'] = 'Scan file has not been updated in 10 days'
       end
 
-      vulnerable_jars = File.readlines(scan_file).map { |l| l.strip }.reject { |l| l.empty? }
+      vulnerable_jars = File.readlines(scan_file).map { |l| l.strip.encode!('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '') }.reject { |l| l.empty? }
     else
       warnings['scan_file'] = 'Scan file not found, vulnerable jars information invalid'
     end
 
     error_file = cache_dir + '/scan_errors'
     if File.file?(error_file)
-      errors = File.readlines(error_file).map { |l| l.strip }.reject { |l| l.empty? }
+      errors = File.readlines(error_file).map { |l| l.strip.encode!('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '') }.reject { |l| l.empty? }
     end
 
     data['vulnerable_jars'] = vulnerable_jars
