@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v0.4.0](https://github.com/puppetlabs/log4jscanner/tree/v0.4.0) (2022-01-14)
+
+[Full Changelog](https://github.com/puppetlabs/log4jscanner/compare/v0.3.0...v0.4.0)
+
+### Added
+
+- Ensure proper UTF-8 output [\#11](https://github.com/puppetlabs/log4jscanner/pull/11) ([Ganneff](https://github.com/Ganneff))
+
+### Fixed
+
+- Fix Windows fact upload in scan script [\#13](https://github.com/puppetlabs/log4jscanner/pull/13) ([nmburgan](https://github.com/nmburgan))
+
 ## [v0.3.0](https://github.com/puppetlabs/log4jscanner/tree/v0.3.0) (2022-01-06)
 
 [Full Changelog](https://github.com/puppetlabs/log4jscanner/compare/v0.2.0...v0.3.0)
