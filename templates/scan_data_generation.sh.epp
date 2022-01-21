@@ -36,7 +36,19 @@ diff=$(diff -y --suppress-common "${UPDATEFILE}" "${UPDATEFILE}.previous" | wc -
 rm -f "${UPDATEFILE}.previous"
 if [ "${diff}" != "0" ]; then
   logger -p info -t scan_data_generation.sh "Uploading fact"
-  <%= $puppet_bin %> <%= $fact_upload_params %> 2>/dev/null 1>/dev/null
+  # Find environment puppet runs in. As it is entirely possible to have puppet agent run by external
+  # tools calling it - and them always telling puppet in which environment, a simple config print
+  # for environment can be wrong.
+  # So we parse the report of the last run and use that.
+  # In case that fails to parse or does not exist yet, we fall back to asking puppet.
+  # The awk BEGIN/END part is magic to make awk exit with an error, if match wasn't found (say, empty file).
+  lastreport=$(puppet config print lastrunreport)
+  if [ -f "${lastreport}" ]; then
+      environment=$(awk -F ': ' 'BEGIN { rc=1 } /^environment: / { print $2; rc=0; exit } END { exit rc }' ${lastreport} || puppet config print environment )
+  else
+      environment=$(puppet config print environment)
+  fi
+  <%= $puppet_bin %> <%= $fact_upload_params %> --environment ${environment} 2>/dev/null 1>/dev/null
 fi
 logger -p info -t scan_data_generation.sh "Log4jscanner scan data refreshed"
 

@@ -73,7 +73,7 @@ class log4jscanner (
   case $facts['kernel'] {
     'Linux': {
       $puppet_bin = '/opt/puppetlabs/bin/puppet'
-      $fact_upload_params = "facts upload --environment ${environment}"
+      $fact_upload_params = "facts upload"
       $fact_upload_cmd = "${puppet_bin} ${fact_upload_params}"
       $cache_dir = '/opt/puppetlabs/log4jscanner'
       $scan_script = 'scan_data_generation.sh'
