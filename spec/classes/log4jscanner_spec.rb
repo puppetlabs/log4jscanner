@@ -6,7 +6,7 @@ describe 'log4jscanner' do
     context "on #{os}" do
       case os_facts[:kernel]
       when 'Linux'
-        let(:fact_upload_cmd) { '/opt/puppetlabs/bin/puppet facts upload --environment production' }
+        let(:fact_upload_cmd) { '/opt/puppetlabs/bin/puppet facts upload' }
         let(:cache_dir) { '/opt/puppetlabs/log4jscanner' }
         let(:scan_script) { 'scan_data_generation.sh' }
         let(:scan_script_mode) { '0700' }
