@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v0.4.0](https://github.com/puppetlabs/log4jscanner/tree/v0.4.0) (2022-01-26)
+
+[Full Changelog](https://github.com/puppetlabs/log4jscanner/compare/v0.4.0...v0.4.0)
+
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
+
+- \(maint\) Fix CODEOWNERS [\#15](https://github.com/puppetlabs/log4jscanner/pull/15) ([mwaggett](https://github.com/mwaggett))
+
 ## [v0.4.0](https://github.com/puppetlabs/log4jscanner/tree/v0.4.0) (2022-01-14)
 
 [Full Changelog](https://github.com/puppetlabs/log4jscanner/compare/v0.3.0...v0.4.0)
