@@ -3,6 +3,10 @@
 This module utilizes Google's [log4jscanner](https://github.com/google/log4jscanner) tool to
 monitor your infrastructure for vulnerable jar files.
 
+> This module is not supported or maintained by Puppet and does not qualify for Puppet Support plans. It's provided without guarantee or warranty and you can use it at your own risk. All bugfixes, updates, and new feature development will come from community contributions.
+>
+> [tier:community]
+
 ## Description
 
 This module can be used in two ways:
