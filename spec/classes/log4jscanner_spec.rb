@@ -79,14 +79,14 @@ describe 'log4jscanner' do
               .with_require("File[#{scan_cmd}]")
           when 'windows'
             is_expected.to contain_exec('Log4jscanner generate scan data')
-              .with_path('C:\Windows\System32/WindowsPowerShell/v1.0')
+              .with_path('C:\Windows\system32/WindowsPowerShell/v1.0')
               .with_refreshonly(true)
               .with_command("powershell -executionpolicy remotesigned -file #{scan_cmd}")
               .with_timeout(0)
             is_expected.to contain_scheduled_task('Log4jscanner - Cache scan data')
               .with_ensure('present')
               .with_enabled(true)
-              .with_command('C:\Windows\System32/WindowsPowerShell/v1.0/powershell.exe')
+              .with_command('C:\Windows\system32/WindowsPowerShell/v1.0/powershell.exe')
               .with_arguments("-NonInteractive -ExecutionPolicy RemoteSigned -File #{scan_cmd}")
               .with_user('SYSTEM')
               .with_trigger(
