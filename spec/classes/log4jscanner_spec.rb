@@ -52,7 +52,6 @@ describe 'log4jscanner' do
             .with_mode(scan_script_mode)
             .with_content(default_script_regex)
             .with_require("File[#{scan_bin}]")
-            .with_notify('Exec[Log4jscanner generate scan data]')
           is_expected.to contain_exec('Log4jscanner fact upload')
             .with_command(fact_upload_cmd)
             .with_path(['/usr/bin', '/bin', '/sbin', '/usr/local/bin', cache_dir])

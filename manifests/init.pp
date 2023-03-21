@@ -225,7 +225,9 @@ class log4jscanner (
   }
 
   unless $skip_initial_scan {
-    File[$scan_cmd] ~> Exec[$generate_scan_data_exec]
+    if $generate_scan_data_exec {
+      File[$scan_cmd] ~> Exec[$generate_scan_data_exec]
+    }
   }
 
   if $fact_upload_exec {
