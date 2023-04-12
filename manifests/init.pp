@@ -14,6 +14,8 @@
 # @param cron_monthday
 # @param cron_weekday
 # @param cron_minute
+# @param skip_initial_scan
+#   If this parameter is set, then the scan data won't be generated until the cron job gets to it
 # @param windows_directories
 #   Which directories to scan on Windows nodes
 # @param windows_skip
@@ -36,6 +38,7 @@ class log4jscanner (
   $cron_monthday                     = absent,
   $cron_weekday                      = absent,
   $cron_minute                       = fqdn_rand(59),
+  Boolean $skip_initial_scan         = false,
   Array[String] $windows_directories = ['C:'],
   Array[String] $windows_skip        = ['C:\Windows\Temp'],
   Integer $scheduled_task_every      = 1,
@@ -219,7 +222,12 @@ class log4jscanner (
     mode    => $scan_script_mode,
     content => epp("${module_name}/${scan_script}.epp", $template_data),
     require => File[$scan_bin],
-    notify  => Exec[$generate_scan_data_exec],
+  }
+
+  unless $skip_initial_scan {
+    if $generate_scan_data_exec {
+      File[$scan_cmd] ~> Exec[$generate_scan_data_exec]
+    }
   }
 
   if $fact_upload_exec {

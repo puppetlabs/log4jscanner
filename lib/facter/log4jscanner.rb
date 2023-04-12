@@ -35,6 +35,7 @@ Facter.add('log4jscanner') do
     data['vulnerable_jars_count'] = vulnerable_jars.count
     data['errors'] = errors
     data['last_scan'] = last_runtime
+    data['warnings'] = warnings
     data
   end
 end
